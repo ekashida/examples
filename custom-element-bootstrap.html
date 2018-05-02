@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Custom Elements: Bootstrap Example</title>
+<meta name="author" title="Eugene Kashida" href="mailto:ekashida@gmail.com">
+</head>
+<body>
+<script>
+
+class MyCustomElement extends HTMLElement {
+    constructor() {
+        super();
+    }
+    connectedCallback() {
+    }
+    disconnectedCallback() {
+    }
+}
+
+customElements.define('my-custom-element', MyCustomElement);
+var instance = document.createElement('my-custom-element');
+document.body.appendChild(instance);
+
+</script>
+</body>
+</html>
