@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Custom Elements: Listening for events</title>
+<meta name="author" title="Eugene Kashida" href="mailto:ekashida@gmail.com">
+</head>
+<body>
+<script>
+
+class MyCustomElement extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'closed' });
+        [
+            'dispatched-on-custom-element-from-inside',
+            'dispatched-on-custom-element-from-outside',
+            'dispatched-on-shadow-root-composed',
+            'dispatched-on-shadow-root-not-composed',
+        ].forEach(eventName => {
+            this.addEventListener(eventName, () => console.log(`${eventName}`));
+        });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <div>
+        `;
+        this._shadowRoot.dispatchEvent(
+            new CustomEvent('dispatched-on-shadow-root-composed', {
+                bubbles: true,
+                composed: true,
+            })
+        );
+        this._shadowRoot.dispatchEvent(
+            new CustomEvent('dispatched-on-shadow-root-not-composed', {
+                bubbles: true,
+            })
+        );
+        this.dispatchEvent(
+            new CustomEvent('dispatched-on-custom-element-from-inside')
+        );
+    }
+}
+
+customElements.define('my-custom-element', MyCustomElement);
+var instance = document.createElement('my-custom-element');
+document.body.appendChild(instance);
+
+instance.dispatchEvent(
+    new CustomEvent('dispatched-on-custom-element-from-outside')
+);
+
+</script>
+</body>
+</html>
