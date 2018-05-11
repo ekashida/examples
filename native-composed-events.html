@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Custom Elements: Which native events are composed?</title>
+<meta name="author" title="Eugene Kashida" href="mailto:ekashida@gmail.com">
+</head>
+<body>
+<script>
+
+class MyCustomElement extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'closed' });
+
+        [
+            'change',
+            'click',
+            'drag',
+            'focusin',
+            'focusout',
+            'input',
+        ].forEach(eventName => {
+            this.addEventListener(
+                eventName,
+                event => console.log(`${eventName} event is composed`)
+            );
+        });
+
+        this._shadowRoot.addEventListener('change', event => {
+            console.log('change event handled on the shadow root');
+        });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <input>
+        `;
+    }
+}
+
+customElements.define('my-custom-element', MyCustomElement);
+var instance = document.createElement('my-custom-element');
+document.body.appendChild(instance);
+
+</script>
+</body>
+</html>
