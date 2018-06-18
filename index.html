@@ -1,0 +1,106 @@
+<html>
+
+<head>
+</head>
+
+<body>
+
+<style>
+#error {
+    color: red;
+}
+.hidden {
+    display: none;
+}
+</style>
+
+<input>
+
+<div id="container">
+    <ul>
+      <li>
+        <input type="checkbox" id="none">
+        <label for="none">no focus()</label>
+      </li>
+      <li>
+        <input type="checkbox" id="click">
+        <label for="click">onclick focus()</label>
+      </li>
+    </ul>
+    <p id="error" class="hidden">At least one checkbox needs to be checked!</p>
+</div>
+
+<input>
+
+<script>
+var none = document.querySelector('#none');
+var click = document.querySelector('#click');
+var container = document.querySelector('#container');
+var error = document.querySelector('#error');
+
+click.addEventListener('click', function (e) {
+    console.log('onclick: "click"');
+    click.focus();
+});
+
+var containsFocus = false;
+var focusHandler = function (e) {
+    error.classList.add('hidden');
+    containsFocus = true;
+};
+var blurHandler = function (e) {
+    containsFocus = false;
+    setTimeout(function () {
+        if (!containsFocus) {
+            var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            var checked = Array.prototype.slice.apply(checkboxes)
+                .some(function (checkbox) {
+                    return checkbox.checked;
+                });
+            if (!checked) {
+                error.classList.remove('hidden');
+            }
+        }
+    }, 0);
+};
+[none, click].forEach(function (checkbox) {
+    checkbox.addEventListener('focus', focusHandler);
+    checkbox.addEventListener('blur', blurHandler);
+});
+
+// Everything below here is just plain console logging
+none.addEventListener('click', function (e) {
+    console.log('none: "click"');
+});
+none.addEventListener('focus', function (e) {
+    console.log('none: "focus"');
+});
+none.addEventListener('focusin', function (e) {
+    console.log('none: "focusin"');
+});
+none.addEventListener('focusout', function (e) {
+    console.log('none: "focusout"');
+});
+
+click.addEventListener('focus', function (e) {
+    console.log('onclick: "focus"');
+});
+click.addEventListener('focusin', function (e) {
+    console.log('onclick: "focusin"');
+});
+click.addEventListener('focusout', function (e) {
+    console.log('onclick: "focusout"');
+});
+
+container.addEventListener('focusin', function (e) {
+    console.log('container: "focusin"');
+});
+container.addEventListener('focusout', function (e) {
+    console.log('container: "focusout"');
+});
+</script>
+
+</body>
+
+</html>
+

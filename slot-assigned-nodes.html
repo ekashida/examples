@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Custom Elements: Slot Assigned Nodes</title>
+<meta name="author" title="Eugene Kashida" href="mailto:ekashida@gmail.com">
+</head>
+<body>
+<script>
+
+class MyParent extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'closed' });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <div>
+                <slot>
+                </slot>
+            </div>
+        `;
+        var slots = this._shadowRoot.querySelectorAll('slot');
+        slots.forEach(function (slot, index) {
+            console.log(index, 'my-parent', 'slot.assignedNodes()', slot.assignedNodes());
+//            console.log(index, 'my-parent', 'slot.assignedElements()', slot.assignedElements());
+            console.log(index, 'my-parent', 'slot.assignedNodes({flatten:true})', slot.assignedNodes({flatten:true}));
+//            console.log(index, 'my-parent', 'slot.assignedElements({flatten:true})', slot.assignedElements({flatten:true}));
+            console.log(index, 'my-parent', 'slot.querySelector("*")', slot.querySelectorAll('*'));
+            console.log(index, 'my-parent', 'slot.childNodes', slot.childNodes);
+            console.log(index, 'my-parent', 'slot.children', slot.children);
+        });
+    }
+}
+class MyChild extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'closed' });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <div>
+                <slot>
+                    <button>[default content] unnamed slot</button>
+                </slot>
+                <slot name="foo">
+                    <button>[default content] foo slot</button>
+                </slot>
+                <slot name="bar">
+                    <button>[default content] bar slot</button>
+                </slot>
+            </div>
+        `;
+        var slots = this._shadowRoot.querySelectorAll('slot');
+        slots.forEach(function (slot, index) {
+            console.log(index, 'my-child', 'slot.assignedNodes()', slot.assignedNodes());
+//            console.log(index, 'my-child', 'slot.assignedElements()', slot.assignedElements());
+            console.log(index, 'my-child', 'slot.assignedNodes({flatten:true})', slot.assignedNodes({flatten:true}));
+//            console.log(index, 'my-child', 'slot.assignedElements({flatten:true})', slot.assignedElements({flatten:true}));
+            console.log(index, 'my-child', 'slot.querySelector("*")', slot.querySelectorAll('*'));
+            console.log(index, 'my-child', 'slot.childNodes', slot.childNodes);
+            console.log(index, 'my-child', 'slot.children', slot.children);
+        });
+    }
+}
+
+customElements.define('my-parent', MyParent);
+customElements.define('my-child', MyChild);
+
+var div = document.createElement('div');
+div.innerHTML = `
+    <!-- myParentSlot.assignedNodes() => [text, my-child, text] -->
+    <!-- myParentSlot.assignedNodes({flatten:true}) => [text, my-child, text] -->
+    <my-parent>
+        <my-child>
+            <button slot="foo">[assigned content] foo slot (1)</button>
+            <button slot="foo">[assigned content] foo slot (2)</button>
+            <slot slot="bar" name="baz">
+                <button>[default content] baz slot</button>
+            </slot>
+        </my-child>
+    </my-parent>
+`;
+document.body.appendChild(div);
+
+var myParent = document.querySelector('my-parent');
+console.log('my-parent', 'myParent.childNodes', myParent.childNodes);
+
+</script>
+</body>
+</html>

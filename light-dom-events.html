@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Custom Elements: Light DOM Events</title>
+<meta name="author" title="Eugene Kashida" href="mailto:ekashida@gmail.com">
+</head>
+<body>
+<script>
+
+class MyParent extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'closed' });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <div>
+                <my-child>
+                    <button>slotted button</button>
+                </my-child>
+                <button>parent button</button>
+            </div>
+        `;
+        this._shadowRoot.querySelector('div').addEventListener('click', function (event) {
+            console.log('click handler on div');
+        });
+        this._shadowRoot.querySelector('my-child').addEventListener('click', function (event) {
+            console.log('click handler on my-child');
+        });
+        this._shadowRoot.addEventListener('click', function (event) {
+            console.log('click handler on parent shadow root');
+        });
+    }
+}
+class MyChild extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'closed' });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <button>child button</button>
+            <slot></slot>
+        `;
+        this._shadowRoot.addEventListener('click', function (event) {
+            console.log('click handler on child shadow root');
+        });
+        this._shadowRoot.querySelector('slot').addEventListener('click', function (event) {
+            console.log('click handler on slot');
+        });
+    }
+}
+
+customElements.define('my-parent', MyParent);
+customElements.define('my-child', MyChild);
+
+var div = document.createElement('div');
+div.innerHTML = `
+    <my-parent></my-parent>
+`;
+document.body.appendChild(div);
+
+</script>
+</body>
+</html>
