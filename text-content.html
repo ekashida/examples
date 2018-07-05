@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Custom Elements: textContent</title>
+<meta name="author" title="Eugene Kashida" href="mailto:ekashida@gmail.com">
+</head>
+<body>
+<script>
+
+class MyParent extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'open' });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <my-child>
+                <p>foo</p>
+            </my-child>
+        `;
+    }
+}
+class MyChild extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'open' });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <div><slot>default content</slot></div>
+        `;
+    }
+}
+
+customElements.define('my-parent', MyParent);
+customElements.define('my-child', MyChild);
+
+var myParent = document.createElement('my-parent');
+document.body.appendChild(myParent);
+
+var myChild = myParent.shadowRoot.querySelector('my-child');
+console.log('text content of element in shadow does not have access to light:', myChild.shadowRoot.querySelector('div').textContent);
+
+</script>
+</body>
+</html>
