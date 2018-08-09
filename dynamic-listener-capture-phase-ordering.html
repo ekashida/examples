@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Custom Elements: Listener execution order when dynamically binding to the capture phase</title>
+<meta name="author" title="Eugene Kashida" href="mailto:ekashida@gmail.com">
+</head>
+<body>
+<script>
+
+class MyCustomElement extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'closed' });
+
+        this.addEventListener('click', event => {
+            console.log(5, 'host element', event.eventPhase);
+        });
+
+        this._shadowRoot.addEventListener('click', event => {
+            console.log(4, 'shadow root', event.eventPhase);
+        });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <button>click me</button>
+        `;
+        const button = this._shadowRoot.querySelector('button');
+        button.addEventListener('click', function(event) {
+            console.log(1, 'button', event.eventPhase);
+        });
+    }
+    click() {
+        console.log('custom click method');
+        const button = this._shadowRoot.querySelector('button');
+        button.addEventListener('click', function(event) {
+            console.log(2, 'button (capture)', event.eventPhase);
+            event.stopPropagation();
+        }, true);
+        button.addEventListener('click', function(event) {
+            console.log(3, 'button', event.eventPhase);
+        });
+        button.click();
+    }
+}
+
+customElements.define('my-custom-element', MyCustomElement);
+var instance = document.createElement('my-custom-element');
+document.body.appendChild(instance);
+instance.click();
+
+</script>
+</body>
+</html>
