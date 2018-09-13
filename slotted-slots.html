@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Custom Elements: Slotted Slots</title>
+<meta name="author" title="Eugene Kashida" href="mailto:ekashida@gmail.com">
+</head>
+<body>
+<script>
+
+class Parent extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'closed' });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <button id=s4-button>update s4 default content</button>
+            <x-child>
+                <slot id=s4>
+                    <p id=p1>s4 default content</p>
+                </slot>
+                <button id=s3-button slot=s3>dispatch non-composed bubbling event</button>
+            </x-child>
+        `;
+        this._shadowRoot.addEventListener('slotchange', event => {
+            console.log('parent slotchange');
+            console.log('event.target', event.target);
+            console.log('event.target.assignedElement({ flatten: true })', event.target.assignedElements({ flatten: true }));
+        });
+        this._shadowRoot.querySelector('#s4-button').addEventListener('click', event => {
+            console.log('update default content of s4');
+            this._shadowRoot.querySelector('#s4').innerHTML = `
+                <p id=p2>s4 updated default content</p>
+            `;
+        });
+
+
+        this._shadowRoot.addEventListener('foo', event => {
+            console.log('parent root foo');
+        });
+        this._shadowRoot.querySelector('#s3-button').addEventListener('click', event => {
+            event.target.dispatchEvent(new CustomEvent('foo', { bubbles: true }));
+        });
+    }
+}
+customElements.define('x-parent', Parent);
+
+class Child extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'closed' });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <div>
+                <slot id=s1>
+                    <p>s1 default content</p>
+                </slot>
+                <slot id=s2 name=s2>
+                    <p>s2 default content</p>
+                </slot>
+                <slot id=s3 name=s3>
+                    <p>s3 default content</p>
+                </slot>
+            </div>
+        `;
+        this._shadowRoot.addEventListener('slotchange', event => {
+            console.log('child slotchange');
+            console.log('event.target', event.target);
+            console.log('event.target.assignedElement({ flatten: true })', event.target.assignedElements({ flatten: true }));
+        });
+
+
+        this._shadowRoot.addEventListener('foo', event => {
+            console.log('child root foo');
+        });
+    }
+}
+customElements.define('x-child', Child);
+
+var div = document.createElement('div');
+div.innerHTML = `
+    <x-parent></x-parent>
+`;
+document.body.appendChild(div);
+
+/*
+Observations:
+- slotchange doesn't fire on initial render for default content
+- slotchange does fire on initial render for non-default content
+- for a slot passed from the parent to a child, slotchange is visible to both parent and child (same as any other event)
+*/
+
+</script>
+</body>
+</html>
