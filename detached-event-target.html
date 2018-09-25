@@ -14,15 +14,28 @@ class Parent extends HTMLElement {
     }
     connectedCallback() {
         this._shadowRoot.innerHTML = `
-            <x-child></x-child>
+            <div id=d1>
+                <x-child></x-child>
+            </div>
         `;
-        this._shadowRoot.querySelector('x-child').addEventListener('click', event => {
-            console.log(`[parent] event.target: ${event.target}`);
-            console.log(`[parent] event.target.tagName: ${event.target.tagName}`);
+        this._shadowRoot.addEventListener('click', event => {
+            console.log(`[parent#shadowRoot] event.target: ${event.target}`);
+            console.log(`[parent#shadowRoot] event.target.parentNode: ${event.target.parentNode}`);
             // event.target => x-child
-            // event.target.parentNode => #shadowRoot
-            // event.target.parentNode.parentNode => null
+            // event.target.parentNode => null
             debugger;
+        });
+        this._shadowRoot.querySelector('x-child').addEventListener('click', event => {
+            console.log(`[parent x-child] event.target: ${event.target}`);
+            console.log(`[parent x-child] event.target.parentNode: ${event.target.parentNode}`);
+            console.log(`[parent x-child] event.target.parentNode.parentNode ${event.target.parentNode.parentNode}`);
+            // event.target => x-child
+            // event.target.parentNode => div#d1
+            // event.target.parentNode.parentNode => #shadowRoot
+            debugger;
+
+            console.log('removing x-child');
+            this._shadowRoot.querySelector('#d1').innerHTML = '<span>removed x-child</span>';
         });
     }
 }
@@ -35,25 +48,39 @@ class Child extends HTMLElement {
     }
     connectedCallback() {
         this._shadowRoot.innerHTML = `
-            <div id=d1>
+            <div id=d2>
                 <button id=b1>click me</button>
             </div>
         `;
         this._shadowRoot.addEventListener('click', event => {
             console.log(`[child#shadowRoot] event.target: ${event.target}`);
+            console.log(`[child#shadowRoot] event.target.parentNode: ${event.target.parentNode}`);
+            console.log(`[child#shadowRoot] event.target.parentNode.parentNode: ${event.target.parentNode.parentNode}`);
             // event.target => button#b1
-            // event.target.parentNode => div#d1
+            // event.target.parentNode => div#d2
             // event.target.parentNode.parentNode => null
             debugger;
         });
 
-        const d1 = this._shadowRoot.querySelector('#d1');
-        d1.addEventListener('click', event => {
-            console.log(`[child#d1] before removal event.target: ${event.target}`);
-            this._shadowRoot.innerHTML = '<span>removed button</span>';
-            console.log(`[child#d1] after removal event.target: ${event.target}`);
+        const d2 = this._shadowRoot.querySelector('#d2');
+        d2.addEventListener('click', event => {
+            console.log(`[child#d2] event.target: ${event.target}`);
+            console.log(`[child#d2] event.target.parentNode: ${event.target.parentNode}`);
+            console.log(`[child#d2] event.target.parentNode.parentNode: ${event.target.parentNode.parentNode}`);
             // event.target => button#b1
             // event.target.parentNode => div#d1
+            // event.target.parentNode.parentNode => #shadowRoot
+            debugger;
+
+            console.log('removing button');
+            this._shadowRoot.innerHTML = '<span>removed button</span>';
+
+            console.log(`[child#d2] event.target: ${event.target}`);
+            console.log(`[child#d2] event.target.parentNode: ${event.target.parentNode}`);
+            console.log(`[child#d2] event.target.parentNode.parentNode: ${event.target.parentNode.parentNode}`);
+
+            // event.target => button#b1
+            // event.target.parentNode => div#d2
             // event.target.parentNode.parentNode => null
             debugger;
         });
