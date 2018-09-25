@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Custom Elements: Detached event.target</title>
+<meta name="author" title="Eugene Kashida" href="mailto:ekashida@gmail.com">
+</head>
+<body>
+<script>
+
+class Parent extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'closed' });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <x-child></x-child>
+        `;
+        this._shadowRoot.querySelector('x-child').addEventListener('click', event => {
+            console.log(`[parent] event.target: ${event.target}`);
+            console.log(`[parent] event.target.tagName: ${event.target.tagName}`);
+            // event.target => x-child
+            // event.target.parentNode => #shadowRoot
+            // event.target.parentNode.parentNode => null
+            debugger;
+        });
+    }
+}
+customElements.define('x-parent', Parent);
+
+class Child extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'closed' });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <div id=d1>
+                <button id=b1>click me</button>
+            </div>
+        `;
+        this._shadowRoot.addEventListener('click', event => {
+            console.log(`[child#shadowRoot] event.target: ${event.target}`);
+            // event.target => button#b1
+            // event.target.parentNode => div#d1
+            // event.target.parentNode.parentNode => null
+            debugger;
+        });
+
+        const d1 = this._shadowRoot.querySelector('#d1');
+        d1.addEventListener('click', event => {
+            console.log(`[child#d1] before removal event.target: ${event.target}`);
+            this._shadowRoot.innerHTML = '<span>removed button</span>';
+            console.log(`[child#d1] after removal event.target: ${event.target}`);
+            // event.target => button#b1
+            // event.target.parentNode => div#d1
+            // event.target.parentNode.parentNode => null
+            debugger;
+        });
+    }
+}
+customElements.define('x-child', Child);
+
+var div = document.createElement('div');
+div.innerHTML = `
+    <x-parent></x-parent>
+`;
+document.body.appendChild(div);
+
+/*
+Observations:
+*/
+
+</script>
+</body>
+</html>
