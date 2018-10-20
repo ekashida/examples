@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Custom Elements: Slot Assigned Nodes</title>
+<meta name="author" title="Eugene Kashida" href="mailto:ekashida@gmail.com">
+</head>
+<body>
+<script>
+
+class MySlotted extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'closed' });
+        this._shadowRoot.innerHTML = `
+            <p>slotted</p>
+        `;
+    }
+    connectedCallback() {
+        console.log('slotted connectedCallback');
+    }
+    disconnectedCallback() {
+        console.log('slotted disconnectedCallback');
+    }
+}
+class MyParent extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'closed' });
+        this._shadowRoot.innerHTML = `
+            <div>
+                <my-child>
+                    <slot></slot>
+                </my-child>
+            </div>
+        `;
+    }
+    connectedCallback() {
+        console.log('parent connectedCallback');
+    }
+    disconnectedCallback() {
+        console.log('parent disconnectedCallback');
+    }
+}
+class MyChild extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'closed' });
+        this._shadowRoot.innerHTML = `
+            <div>
+                <button>foo</button>
+                <slot></slot>
+            </div>
+        `;
+    }
+    connectedCallback() {
+        console.log('child connectedCallback');
+    }
+    disconnectedCallback() {
+        console.log('child disconnectedCallback');
+    }
+}
+
+customElements.define('my-slotted', MySlotted);
+customElements.define('my-parent', MyParent);
+customElements.define('my-child', MyChild);
+
+var div = document.createElement('div');
+div.innerHTML = `
+    <my-parent>
+        <my-slotted></my-slotted>
+    </my-parent>
+`;
+document.body.appendChild(div);
+document.body.removeChild(div);
+
+</script>
+</body>
+</html>
