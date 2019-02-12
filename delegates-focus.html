@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Custom Elements: delegatesFocus</title>
+<meta name="author" title="Eugene Kashida" href="mailto:ekashida@gmail.com">
+</head>
+<body>
+<script>
+
+class DelegatesFalse extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({
+            delegatesFocus: false,
+            mode: 'closed',
+        });
+        this._shadowRoot.innerHTML = `
+            <div>
+                <h3>no tabindex</h3>
+                <input placeholder="delegatesFocus=false">
+            </div>
+        `;
+    }
+    connectedCallback() {
+        var tabindex = this.getAttribute('tabindex');
+        if (tabindex) {
+            this._shadowRoot
+                .querySelector('h3')
+                .textContent = `tabindex=${tabindex}`;
+        }
+    }
+}
+class DelegatesTrue extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({
+            delegatesFocus: true,
+            mode: 'closed',
+        });
+        this._shadowRoot.innerHTML = `
+            <div>
+                <h3>no tabindex</h3>
+                <input placeholder="delegatesFocus=true">
+            </div>
+        `;
+    }
+    connectedCallback() {
+        var tabindex = this.getAttribute('tabindex');
+        if (tabindex) {
+            this._shadowRoot
+                .querySelector('h3')
+                .textContent = `tabindex=${tabindex}`;
+        }
+    }
+}
+
+customElements.define('delegates-true', DelegatesTrue);
+customElements.define('delegates-false', DelegatesFalse);
+
+var div = document.createElement('div');
+div.innerHTML = `
+    <input placeholder="spacer">
+
+    <delegates-false></delegates-false>
+
+    <input placeholder="spacer">
+
+    <delegates-false tabindex="0"></delegates-false>
+
+    <input placeholder="spacer">
+
+    <delegates-false tabindex="-1"></delegates-false>
+
+    <input placeholder="spacer">
+
+    <delegates-true></delegates-true>
+
+    <input placeholder="spacer">
+
+    <delegates-true tabindex="0"></delegates-true>
+
+    <input placeholder="spacer">
+
+    <delegates-true tabindex="-1"></delegates-true>
+
+    <input placeholder="spacer">
+`;
+document.body.appendChild(div);
+
+</script>
+</body>
+</html>
