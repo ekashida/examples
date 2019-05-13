@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Custom Elements: delegatesFocus focus method</title>
+<meta name="author" title="Eugene Kashida" href="mailto:ekashida@gmail.com">
+</head>
+<body>
+<script>
+
+class DelegatesFalse extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({
+            delegatesFocus: false,
+            mode: 'open',
+        });
+        this._shadowRoot.innerHTML = `
+            <div>
+                <input placeholder="delegatesFocus=false">
+            </div>
+        `;
+    }
+}
+class DelegatesTrue extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({
+            delegatesFocus: true,
+            mode: 'open',
+        });
+        this._shadowRoot.innerHTML = `
+            <div>
+                <span tabindex="-1">focusable span -1</span>
+                <span tabindex="0">focusable span 0</span>
+                <input placeholder="delegatesFocus=true">
+            </div>
+        `;
+    }
+}
+
+customElements.define('delegates-true', DelegatesTrue);
+customElements.define('delegates-false', DelegatesFalse);
+
+var div = document.createElement('div');
+div.innerHTML = `
+    <div>
+        <button class="delegates-false-button">Invoke focus() on delegates-false</button>
+        <delegates-false></delegates-false>
+    </div>
+    <div>
+        <button class="delegates-true-button">Invoke focus() on delegates-true</button>
+        <delegates-true></delegates-true>
+    </div>
+    <div>
+        <button class="foo">Invoke focus() on foo input</button>
+        <input placeholder="foo">
+    </div>
+`;
+document.body.appendChild(div);
+
+var falseButton = div.querySelector('.delegates-false-button');
+falseButton.addEventListener('click', function() {
+    div.querySelector('delegates-false').focus();
+});
+var trueButton = div.querySelector('.delegates-true-button');
+trueButton.addEventListener('click', function() {
+    div.querySelector('delegates-true').focus();
+});
+var fooButton = div.querySelector('.foo');
+fooButton.addEventListener('click', function() {
+    div.querySelector('input').focus();
+});
+
+</script>
+</body>
+</html>
