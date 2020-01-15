@@ -12,7 +12,7 @@ class DelegatesFalse extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({
             delegatesFocus: false,
-            mode: 'closed',
+            mode: 'open',
         });
         this._shadowRoot.innerHTML = `
             <div>
@@ -28,6 +28,12 @@ class DelegatesFalse extends HTMLElement {
                 .querySelector('h3')
                 .textContent = `tabindex=${tabindex}`;
         }
+        this.addEventListener('focus', function() {
+            console.log('focus host element');
+        });
+        this._shadowRoot.querySelector('input').addEventListener('focus', function() {
+            console.log('focus internal input');
+        });
     }
 }
 class DelegatesTrue extends HTMLElement {
@@ -35,7 +41,7 @@ class DelegatesTrue extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({
             delegatesFocus: true,
-            mode: 'closed',
+            mode: 'open',
         });
         this._shadowRoot.innerHTML = `
             <div>
@@ -51,6 +57,12 @@ class DelegatesTrue extends HTMLElement {
                 .querySelector('h3')
                 .textContent = `tabindex=${tabindex}`;
         }
+        this.addEventListener('focus', function() {
+            console.log('focus host element');
+        });
+        this._shadowRoot.querySelector('input').addEventListener('focus', function() {
+            console.log('focus internal input');
+        });
     }
 }
 
@@ -61,7 +73,7 @@ var div = document.createElement('div');
 div.innerHTML = `
     <input placeholder="spacer">
 
-    <delegates-false></delegates-false>
+    <delegates-false class="notabindex"></delegates-false>
 
     <input placeholder="spacer">
 
@@ -73,7 +85,7 @@ div.innerHTML = `
 
     <input placeholder="spacer">
 
-    <delegates-true></delegates-true>
+    <delegates-true class="notabindex"></delegates-true>
 
     <input placeholder="spacer">
 
@@ -86,6 +98,31 @@ div.innerHTML = `
     <input placeholder="spacer">
 `;
 document.body.appendChild(div);
+
+[
+    'delegates-false.notabindex',
+    'delegates-false[tabindex="0"]',
+    'delegates-false[tabindex="-1"]',
+    'delegates-true.notabindex',
+    'delegates-true[tabindex="0"]',
+    'delegates-true[tabindex="-1"]',
+].forEach((selector) => {
+    var button = document.createElement('button');
+    button.textContent = selector;
+    button.style = 'margin-top: 1em; display: block;';
+    button.addEventListener('click', function () {
+        document.querySelector(selector).focus();
+    });
+    div.appendChild(button);
+});
+
+setInterval(function () {
+    var activeElement = document.activeElement;
+    while (activeElement.shadowRoot && activeElement.shadowRoot.activeElement) {
+        activeElement = activeElement.shadowRoot.activeElement;
+    };
+    console.log(activeElement);
+}, 3000);
 
 </script>
 </body>
