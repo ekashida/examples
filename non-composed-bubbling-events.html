@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Event Propagation (bubbles: true, composed: false)</title>
+<meta name="author" title="Eugene Kashida" href="mailto:ekashida@gmail.com">
+</head>
+<body>
+<script>
+
+class MyCustomElement extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'open' });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <div>
+                <span></span>
+            </div>
+        `;
+        const span = this._shadowRoot.querySelector('span');
+        const div = this._shadowRoot.querySelector('div');
+        const logs = [];
+
+        [
+            span,
+            div,
+            this._shadowRoot,
+            this._shadowRoot.host,
+            document,
+        ].forEach((elm) => {
+            elm.addEventListener('foo', (event) => {
+                logs.push([event.currentTarget, event.target, event.composedPath()]);
+            });
+        });
+
+        span.dispatchEvent(
+            new CustomEvent('foo', {
+                bubbles: true,
+                composed: false
+            })
+        );
+            
+        // [            
+        //   [span, span, [span, div, document-fragment]]
+        //   [div, span, [span, div, document-fragment]]
+        //   [document-fragment, span, [span, div, document-fragment]]
+        // ]
+        console.log(logs);
+    }
+}
+
+customElements.define('my-custom-element', MyCustomElement);
+var instance = document.createElement('my-custom-element');
+document.body.appendChild(instance);
+
+</script>
+</body>
+</html>
