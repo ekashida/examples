@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Event Propagation (bubbles: false, composed: true)</title>
+<meta name="author" title="Eugene Kashida" href="mailto:ekashida@gmail.com">
+</head>
+<body>
+<script>
+
+const bubblePhaseLogs = [];
+const capturePhaseLogs = [];
+
+class Parent extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'open' });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <div>
+                <child-element></child-element>
+            </div>
+        `;
+    }
+}
+
+class Child extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({ mode: 'open' });
+    }
+    connectedCallback() {
+        this._shadowRoot.innerHTML = `
+            <div>
+                <span></span>
+            </div>
+            <button>dispatch "foo" event</button>
+        `;
+
+        const span = this._shadowRoot.querySelector('span');
+        const button = this._shadowRoot.querySelector('button');
+
+        button.addEventListener('click', () => {
+            span.dispatchEvent(
+                new CustomEvent('foo', {
+                    bubbles: false,
+                    composed: true
+                })
+            );
+            console.log('capture phase', capturePhaseLogs);
+            console.log('bubble phase', bubblePhaseLogs);
+        });
+    }
+}
+
+function addListeners(node, capture) {
+    let logs = capture ? capturePhaseLogs : bubblePhaseLogs;
+    while (node !== undefined) {
+        node.addEventListener('foo', (event) => {
+            logs.push([
+                event.currentTarget,
+                event.target,
+                event.composedPath()
+            ]);
+        }, capture);
+        node = node.parentNode ? node.parentNode : node.host;
+    }
+}
+
+customElements.define('child-element', Child);
+customElements.define('parent-element', Parent);
+const parentElement = document.createElement('parent-element');
+document.body.appendChild(parentElement);
+
+const span = parentElement.shadowRoot
+    .querySelector('child-element').shadowRoot
+    .querySelector('span');
+
+addListeners(span, false);
+addListeners(span, true);
+</script>
+</body>
+</html>
