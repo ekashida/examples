@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+
+customElements.define('delegates-true', class extends HTMLElement {
+    constructor() {
+        super();
+        this._shadowRoot = this.attachShadow({
+            delegatesFocus: true,
+            mode: 'open',
+        });
+        this._shadowRoot.appendChild(
+            document.createElement('input')
+        );
+    }
+});
+
+const elm = document.createElement('delegates-true');
+document.body.appendChild(elm);
+
+const button = document.createElement('button');
+button.innerText = 'invoke focus()';
+button.addEventListener('click', () => {
+    elm.focus();
+    // Firefox (v83) is currently the only browser that doesn't transfer focus to the input.
+    console.log('Focused element:', document.activeElement);
+});
+document.body.appendChild(button);
+
+</script>
+</body>
+</html>
